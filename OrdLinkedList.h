@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <stdlib.h>
+#include <cmath>
 #include "OrdLinkedListExceptions.h"
 
 using namespace std;
@@ -42,16 +43,16 @@ class OrdLinkedList
     Node* p_prev;
     //pointer to next node, closer to tail
     Node* p_next;
-    //where node is in linked list
-    int listPos;
   };
 
   Node* p_head;
   Node* p_tail;
   Node* p_marker;
-  int numElements;
-
+ 
   Node* p_traversal;
+  int p_traversalPos;
+
+  int numElements;
   
 };
 
@@ -68,6 +69,8 @@ OrdLinkedList <T> :: OrdLinkedList()
   p_marker = 0;
   //since there are no elements in this list yet
   numElements = 0;
+  //set p_traversal
+  p_traversal = 0;
       
 }
 
@@ -316,40 +319,163 @@ T OrdLinkedList <T> :: at(int pos)
 
   //search helper node*
   Node* p_search;
+  //position ints
+  int headPos = 0;
+  int tailPos = numElements;
 
-  int myCount = 0;
-
+  int count = 0;
+  
+  //if pos isn't a valid index
   if(pos >= size() ||
      pos < 0){
     OrdLinkedListOutOfBoundsException error;
     throw error;
   }
+  //if pos is within used potion of array
   else{
-    //if p_traversal hasn't been initialized yet or...
-    //if pos is closest to p_head...
-    //if(p_traversal == 0 ||
-    //pos ){ //not sure about p_traversal yet...
+      //if p_traversal hasn't been initialized yet
+      if(p_traversal == 0){
+
+	  //set position of traversal pointer
+	  p_traversalPos = pos;
+
+	  //check whether should go from head or tail
+	  //from head
+	  if(abs(p_traversalPos) < abs(p_traversalPos-tailPos)){
+	      
+	      //start search from head
+	      p_search = p_head;
+
+	      while(p_search != 0){
+     	      
+		  //if the count is equal to the position we are looking for...
+		  if(count == pos){
+		      retVal = p_search->data;
+		      //set traversal pointer
+		      p_traversal = p_search;
+		      break;
+		  }
       
-      //start search from head
-      p_search = p_head;
+		  //otherwise increment p_search
+		  p_search = p_search->p_next;
+	      }
+	  }
+	  //from tail
+	  else{
 
-      while(p_search != 0){
-     
-	//set listPos of current p_search
-	p_search->listPos = myCount;
+	      //start search from tail
+	      p_search = p_tail;
 
-	//if the count is equal to the position we are looking for...
-	if(myCount == pos){
-	  retVal = p_search->data;
-	  break;
-	}
+	      while(p_search != 0){
+     	      
+		  //if the count is equal to the position we are looking for...
+		  if(count == pos){
+		      retVal = p_search->data;
+		      //set traversal pointer
+		      p_traversal = p_search;
+		      break;
+		  }
       
-	//otherwise increment p_search
-	p_search = p_search->p_next;
+		  //otherwise increment p_search
+		  p_search = p_search->p_prev;
+	      }
+	  }	  
+      }
+      //if p_traversal has been initialized
+      else{
+	  
+	  int fromHead = pos;
+	  int fromTail = abs(tailPos - pos);
+	  int fromTrav = abs(p_traversalPos - pos);
 
-    }
+	  //at this point, p_traversal, p_traversalPos, headPos and tailPos should be set
+	  //check which distance is smallest
+	  if(fromHead < fromTail &&
+	     fromHead < fromTrav){
+	      //start search from head
+	      p_search = p_head;
 
+	      while(p_search != 0){
+     	      
+		  //if the count is equal to the position we are looking for...
+		  if(count == pos){
+		      retVal = p_search->data;
+		      //set traversal pointer
+		      p_traversal = p_search;
+		      break;
+		  }
+      
+		  //otherwise increment p_search
+		  p_search = p_search->p_next;
+	      }
+	  }
+	  else if(fromTail < fromHead &&
+		  fromTail < fromTrav){
+	      //start search from tail
+	      p_search = p_tail;
+
+	      while(p_search != 0){
+     	      
+		  //if the count is equal to the position we are looking for...
+		  if(count == pos){
+		      retVal = p_search->data;
+		      //set traversal pointer
+		      p_traversal = p_search;
+		      break;
+		  }
+      
+		  //otherwise increment p_search
+		  p_search = p_search->p_prev;
+	      }
+	  }
+	  else{
+	      //start from traversal pointer
+	      //check whether to go to left or right of traversal pointer
+	      if(pos < p_traversalPos){
+		  //go left
+		  
+		  //start from traversal pointer
+		  p_search = p_traversal;
+
+		  while(p_search != 0){
+     	      
+		      //if the count is equal to the position we are looking for...
+		      if(count == pos){
+			  retVal = p_search->data;
+			  //set traversal pointer
+			  p_traversal = p_search;
+			  break;
+		      }
+      
+		      //otherwise increment p_search towards left
+		      p_search = p_search->p_prev;
+		  }
+
+	      }
+	      else{
+		  //go right
+
+		  //start from traversal pointer
+		  p_search = p_traversal;
+
+		  while(p_search != 0){
+     	      
+		      //if the count is equal to the position we are looking for...
+		      if(count == pos){
+			  retVal = p_search->data;
+			  //set traversal pointer
+			  p_traversal = p_search;
+			  break;
+		      }
+      
+		      //otherwise increment p_search towards right
+		      p_search = p_search->p_next;
+		  }
+	      }
+	  }
+      }
   }
+
 
   return retVal;
 
