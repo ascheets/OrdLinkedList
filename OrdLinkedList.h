@@ -42,12 +42,16 @@ class OrdLinkedList
     Node* p_prev;
     //pointer to next node, closer to tail
     Node* p_next;
+    //where node is in linked list
+    int listPos;
   };
 
   Node* p_head;
   Node* p_tail;
   Node* p_marker;
   int numElements;
+
+  Node* p_traversal;
   
 };
 
@@ -311,7 +315,7 @@ T OrdLinkedList <T> :: at(int pos)
   T retVal;
 
   //search helper node*
-  Node* p_search = p_head;
+  Node* p_search;
 
   int myCount = 0;
 
@@ -321,18 +325,30 @@ T OrdLinkedList <T> :: at(int pos)
     throw error;
   }
   else{
-    while(p_search != 0){
-     
-      //if the count is equal to the position we are looking for...
-      if(myCount == pos){
-	retVal = p_search->data;
-	break;
-      }
+    //if p_traversal hasn't been initialized yet or...
+    //if pos is closest to p_head...
+    //if(p_traversal == 0 ||
+    //pos ){ //not sure about p_traversal yet...
       
-      //otherwise increment p_search
-      p_search = p_search->p_next;
+      //start search from head
+      p_search = p_head;
+
+      while(p_search != 0){
+     
+	//set listPos of current p_search
+	p_search->listPos = myCount;
+
+	//if the count is equal to the position we are looking for...
+	if(myCount == pos){
+	  retVal = p_search->data;
+	  break;
+	}
+      
+	//otherwise increment p_search
+	p_search = p_search->p_next;
 
     }
+
   }
 
   return retVal;
@@ -469,67 +485,20 @@ bool OrdLinkedList <T> :: isEmpty()
   return (size() == 0);
 }
 
-/*//printAllFromHead()
+/*
+
+//printAllFromHead()
 template <class T>
 void OrdLinkedList <T> :: printAllFromHead()
 {
-  //helper T object
-  T val;
 
-  if(isEmpty()){
-    
-    //if the list is empty
-    cout << "Not printing because list is empty" << endl;
-
-  }
-  else{
-    
-    //if there is a last item (list is not empty)
-    //store the element in val
-    if(first(val)){
-
-      cout << val << endl;
-
-      //while we are not at the end, store each element in val
-      while(next(val)){
-
-	cout << val << endl;
-
-      }
-    }
-  }
 }
 
 //printAllFromTail()
 template <class T>
 void OrdLinkedList <T> :: printAllFromTail()
 {
-  //helper T object
-  T val;
 
-  if(isEmpty()){
-    
-    //if the list is empty
-    cout << "Not printing because list is empty" << endl;
-  
-  }
-  else{
-    
-    //if there is a last item (list is not empty)
-    //store the element in val
-    if(last(val)){
-
-      cout << val << endl;
-
-      //while we are not at the end, store each element in val
-      while(previous(val)){
-
-	cout << val << endl;
-
-      }
-
-    }
-  }    
 }
 
 */
