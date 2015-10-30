@@ -65,18 +65,18 @@ void simpleList()
     //print out all the items in the list in order
     if (list.first(x))
       {
-	cout << x << endl;
-	while (list.next(x))
-	  {
-	    cout << x << endl;
+    	cout << x << endl;
+    	while (list.next(x))
+    	  {
+    	    cout << x << endl;
 
-	    if (x == 30)
-	      {
-		//moving the current pointer inside find means that
-		//we might not get the items back in order
-		list.find(20);
-	      }
-	  }
+    	    if (x == 30)
+    	      {
+    		//moving the current pointer inside find means that
+    		//we might not get the items back in order
+    		list.find(20);
+    	      }
+    	  }
       }
 
     //test the most efficient route to pos

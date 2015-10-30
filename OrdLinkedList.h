@@ -98,6 +98,9 @@ void OrdLinkedList <T> :: insert(const T& elem)
   //create new node on the heap
   Node* p_newNode = new Node;
 
+  //initialize search node pointer
+  Node* p_search = p_head;
+
   //set data for new node
   p_newNode->data = elem;
 
@@ -111,7 +114,7 @@ void OrdLinkedList <T> :: insert(const T& elem)
     //update dll values
     p_head = p_newNode;
     p_tail = p_newNode;
-    p_marker = p_newNode;
+    //p_marker = p_newNode; //for now don't touch p_marker here...
 
   }
   //if the list is not empty
@@ -146,40 +149,32 @@ void OrdLinkedList <T> :: insert(const T& elem)
     //otherwise insert somewhere in middle
     else{
       
-      //helper T object
-      T val;
-      
       //iterate through list, trying to find correct position for newNode
-      if(first(val)){
+      while(p_search != 0){
 
 	//p_marker is equal to p_head at this point
 
-	//each time this loop runs, val should be next item in list
-	while(next(val)){
+	//if the new element is less than or equal to p_search->data
+	if(p_newNode->data <= p_search->data){
 
-	  //p_marker is set to one towards tail by next(val)
+	  //what list kind of looks like:
+	  //[i-1][i][i+1]
+	  //[p_search->p_prev][p_search][p_search->p_next]
 
-	  //val is p_marker->data
-	  //if the new element is less than or equal to current marker
-	  //place it before current marker
-	  if(p_newNode->data <= val){
+	  Node* beforeMarker = p_search->p_prev;
 
-	    //want to insert p_newNode just before p_marker 
-	    //[p_marker->p_prev][p_marker][p_marker->p_next]
-	    //create helper pointer
-	    Node* beforeMarker = p_marker->p_prev;
+	  //insert newNode correctly, hopefully...
+	  beforeMarker->p_next = p_newNode;
 
-	    //insert newNode correctly, hopefully...
-	    beforeMarker->p_next = p_newNode;
+          p_newNode->p_prev = beforeMarker;
+	  p_search->p_prev = p_newNode;
+	  p_newNode->p_next = p_search;	    
 
-	    p_newNode->p_prev = beforeMarker;
-
-	    p_marker->p_prev = p_newNode;
-	    p_newNode->p_next = p_marker;	    
-	    
-	    break;
-	  }
+	  break;
 	}
+
+	//increment p_search
+	p_search = p_search->p_next;
       }
     }
   }
@@ -195,27 +190,24 @@ bool OrdLinkedList <T> :: find(const T& elem)
 {
  
   bool retVal = false;
+  
+  //temp node* search helper
+  Node* p_search = p_head;
 
-  //helper T object
-  T val;
-
-  if(first(val)){
+  while(p_search != 0){
     
-    if(val == elem){
+    if(p_search->data == elem){
       retVal = true;
+      break;      
     }
-    else{
-      while(next(val)){
-	if(retVal == true)
-	  break;
-	if(val == elem){
-	  retVal = true;
-	  break;
-	}
-      }
-    }
+    
+    //else increment p_search
+    p_search = p_search->p_next;
+
   }
+
   return retVal;
+
 }
 
 //remove
@@ -225,14 +217,20 @@ bool OrdLinkedList <T> :: remove(const T& elem)
   //assume the element is not in the list
   bool retVal = false;
 
-  //helper T object
-  T val;
+  //temp Node* search helper
+  Node* p_search = p_head;
+
+  if(isEmpty()){
+    //OrdLinkedListOutOfBoundsException error;
+    //throw error;
+    cout << "Trying to remove from an empty list...carry on" << endl;
+  }
 
   //this code shouldn't be called unless list has something in it...
-  if(first(val)){
+  while(p_search != 0){
 
     //if val is equal to remove elem
-    if(val == elem){
+    if(p_search->data == elem){
 
       //premptively change numElements and switch retVal
       numElements--;
@@ -247,17 +245,17 @@ bool OrdLinkedList <T> :: remove(const T& elem)
 	p_tail = 0;
 
 	//free up old node space
-	delete p_marker;
+	delete p_search;
 	
 	//just for good measure, reset p_marker...
-	p_marker = 0;
+	p_search = 0;
 
       }
       //it is not the last item in the list...
       else{
 	
 	  //is item head?
-	  if(p_marker == p_head){
+	  if(p_search == p_head){
 
 	    //adjust p_head
 	    p_head = p_head->p_next;
@@ -266,13 +264,10 @@ bool OrdLinkedList <T> :: remove(const T& elem)
 	    delete p_head->p_prev;
 	    p_head->p_prev = 0;
 
-	    //adjust p_marker
-	    p_marker = p_head;
-
 	  }
 
 	  //is item tail?
-	  else if(p_marker == p_tail){
+	  else if(p_search == p_tail){
 
 	    //adjust p_tail
 	    p_tail = p_tail->p_prev;
@@ -281,117 +276,28 @@ bool OrdLinkedList <T> :: remove(const T& elem)
 	    delete p_tail->p_next;
 	    p_tail->p_next = 0;
 
-	    //adjust p_marker
-	    p_marker = p_head;
-
 	  }
 
 	  //is item normal?
 	  else{
 
-	    //adjust pointers so that p_marker prev and next point to each other
-	    p_marker->p_next->p_prev = p_marker->p_prev;
-    	    p_marker->p_prev->p_next = p_marker->p_next;
+	    //adjust pointers so that p_search prev and next point to each other
+	    p_search->p_next->p_prev = p_search->p_prev;
+    	    p_search->p_prev->p_next = p_search->p_next;
 
-	    //free up old item using tempNode
-	    Node* p_temp = p_marker;
-	    
-	    //adjust p_marker
-	    p_marker = p_marker->p_next;
-
-	    //delete item temp pointer points to
-	    delete p_temp;
-	    p_temp = 0;
-
-	  }
-
-	  //iterate through list
-	  while(next(val)){
-      
-	    //if val is equal to remove elem
-	    if(val == elem){
-	
-	      //preemptively change numElements and switch retVal
-	      numElements--;
-
-	      retVal = true;
-
-	      //is it the last item in the list?
-	      if(numElements == 0){
-		
-		//basically as we started
-		p_head = 0;
-		p_tail = 0;
-
-		//free up old node space
-		delete p_marker;
-
-		//just for good measure, reset p_marker...
-		p_marker = 0;
-
-		//don't iterate again, we know the list is empty...
-		break;
-	      }
-	      //not the last item in the list...
-	      else{
-		  //is item head?
-		  if(p_marker == p_head){
-
-		    //adjust p_head
-		    p_head = p_head->p_next;
-
-		    //free up old item
-		    delete p_head->p_prev;
-		    p_head->p_prev = 0;
-
-		    //adjust p_marker
-		    p_marker = p_head;
-
-		  }
-		  //is item tail?
-		  else if(p_marker == p_tail){
-		    
-		    //adjust p_tail
-		    p_tail = p_tail->p_prev;
-
-		    //free up old item
-		    delete p_tail->p_next;
-		    p_tail->p_next = 0;
-
-		    //adjust p_marker
-		    p_marker = p_head;
-
-		  }
-		  //is item normal?
-		  else{
-
-		    //adjust pointers so that p_marker prev and next point to each other
-		    p_marker->p_next->p_prev = p_marker->p_prev;
-		    p_marker->p_prev->p_next = p_marker->p_next;
-
-		    //free up old item using tempNode
-		    Node* p_temp = p_marker;
-	    
-		    //adjust p_marker
-		    p_marker = p_marker->p_next;
-
-		    //delete item temp pointer points to
-		    delete p_temp;
-		    p_temp = 0;
-
-		  }
-	      }
-
-	    }
+	    //free up old item
+	    delete p_search;
 	  }
       }
-    
+      
+      //we have removed an item, exit while loop
+      break;    
     }
+    
+    //increment p_search
+    p_search = p_search->p_next;
   }
-  else{
-    //cout << "Tried to remove from an empty list" << endl;
-  }
-
+  
   return retVal;
 
 }
@@ -404,31 +310,28 @@ T OrdLinkedList <T> :: at(int pos)
   //object to return eventually
   T retVal;
 
-  //helper T object
-  T val;
+  //search helper node*
+  Node* p_search = p_head;
 
   int myCount = 0;
 
-  if(pos >= size()){
+  if(pos >= size() ||
+     pos < 0){
     OrdLinkedListOutOfBoundsException error;
     throw error;
   }
   else{
-    if(first(val)){
-      //right now val is at index 0
+    while(p_search != 0){
+     
+      //if the count is equal to the position we are looking for...
       if(myCount == pos){
-	retVal = val;
+	retVal = p_search->data;
+	break;
       }
-      else{
-	while(next(val)){
-	  myCount++;
+      
+      //otherwise increment p_search
+      p_search = p_search->p_next;
 
-	  if(myCount == pos){
-	    retVal = val;
-	    break;
-	  }
-	}
-      }
     }
   }
 
