@@ -331,7 +331,7 @@ T OrdLinkedList <T> :: at(int pos)
     OrdLinkedListOutOfBoundsException error;
     throw error;
   }
-  //if pos is within used potion of array
+  //if pos is within valid indices
   else{
       //if p_traversal hasn't been initialized yet
       if(p_traversal == 0){
